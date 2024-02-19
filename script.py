@@ -11,16 +11,12 @@ stream_name = 'your-stream-name'
 
 # Function to generate simulated energy consumption data
 def generate_energy_data():
-    device_id = random.randint(1, 100)
-    device_type = random.choice(['smart_meter', 'analog_meter'])
     location = random.choice(['home', 'office', 'factory'])
     energy_consumption = round(random.uniform(1, 10), 2)  # Simulated energy consumption in kWh
     timestamp = int(time.time())
     temperature = round(random.uniform(15, 35), 2)  # Simulated temperature in Celsius
     humidity = round(random.uniform(30, 70), 2)  # Simulated humidity in percentage
     return {
-        'device_id': device_id,
-        'device_type': device_type,
         'location': location,
         'energy_consumption': energy_consumption,
         'timestamp': timestamp,

@@ -3,11 +3,15 @@ import json
 import random
 import time
 
+aws_access_key_id='AKIA5BMNWAG7KLHIHLBR'
+aws_secret_access_key='OLe48CVFm9b3G40E58Y5beOzaiwQ+6iZRncRNO+m'
+
+
 # Initialize Kinesis client
-kinesis_client = boto3.client('kinesis', region_name='your-region')
+kinesis_client = boto3.client('kinesis',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key, region_name='us-east-1')
 
 # Name of the Kinesis Data Stream
-stream_name = 'your-stream-name'
+stream_name = 'energy_data_stream'
 
 # Function to generate simulated energy consumption data
 def generate_energy_data():
@@ -28,7 +32,7 @@ def generate_energy_data():
 def send_data_to_kinesis():
     while True:
         data = generate_energy_data()
-        partition_key = str(data['device_id'])
+        partition_key = str(data['location'])
         payload = json.dumps(data)
         kinesis_client.put_record(
             StreamName=stream_name,
@@ -36,7 +40,7 @@ def send_data_to_kinesis():
             PartitionKey=partition_key
         )
         print("Sent data: ", data)
-        time.sleep(1)  # Adjust the frequency of data generation as needed
+        time.sleep(5)  # Adjust the frequency of data generation as needed
 
 if __name__ == '__main__':
     send_data_to_kinesis()

@@ -4,13 +4,13 @@ FROM KINESIS
 IAM_ROLE 'arn:aws:iam::896334692798:role/redshift-kinesis-role';
 
 
-CREATE MATERIALIZED VIEW ENERGY auto refresh yes AS
+CREATE MATERIALIZED VIEW ENERGY AS
     SELECT approximate_arrival_timestamp,
     partition_key,
     shard_id,
     sequence_number,
-    json_parse(kinesis_data) as payload    
-    FROM ENERGY_CONSUMPTION."energy_data_stream";
+    FROM_VARBYTE(kinesis_data, 'utf8') as payload    
+    FROM ENERGY_CONSUMPTION.energy_data_stream;
 
 
 select * from ENERGY

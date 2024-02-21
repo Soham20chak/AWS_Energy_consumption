@@ -1,28 +1,26 @@
 import json
+import base64
 import boto3
 
 def lambda_handler(event, context):
-    # Initialize SNS client
-    sns_client = boto3.client('sns')
-    
-    # Iterate over records in the Kinesis event
-    for record in event['Records']:
-        # Decode and parse the data from the Kinesis record
-        payload = json.loads(record['kinesis']['data'])
-        
-        # Check if the energy consumed is more than 12
-        if payload['energy_consumed'] > 12:
-            # Compose message for SNS notification
-            message = f"High energy consumption detected at location {payload['location']}. Energy consumed: {payload['energy_consumed']}"
+    sns_topic_arn = 'arn:aws:sns:us-east-1:896334692798:excess_alert'
+
+    # Check if the 'Records' key exists in the event
+    if 'Records' in event:
+        for record in event['Records']:
+            # Decode the Kinesis record data (assuming it's in base64)
+            kinesis_data = record['kinesis']['data']
+            decoded_data = base64.b64decode(kinesis_data).decode('utf-8')
             
-            # Publish message to SNS topic
-            sns_client.publish(
-                TopicArn='YOUR_SNS_TOPIC_ARN',
-                Message=message,
-                Subject='High Energy Consumption Alert'
-            )
-            
-    return {
-        'statusCode': 200,
-        'body': json.dumps('SNS notification sent successfully')
-    }
+            # Process the data (you can customize this part)
+            data = json.loads(decoded_data)
+            energy_consumed = data.get('energy_consumed')
+            message = f"High energy consumption detected at location {data['location']}. Energy consumed: {data['energy_consumed']}"
+            # Only publish if energy consumption is greater than 12
+            if energy_consumed > 12:
+                sns_client = boto3.client('sns')
+                sns_client.publish(TopicArn=sns_topic_arn, Message=message)
+
+        return "Processed {} records.".format(len(event['Records']))
+    else:
+        return "No records found in the event."

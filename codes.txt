@@ -22,32 +22,34 @@ SELECT location, SUM(energy_consumption) AS total_energy_consumption
 FROM energy_data
 GROUP BY location;
 
-REFRESH MATERIALIZED VIEW ENERGY;
--- Calculate correlation between energy consumption and temperature
-SELECT CORR(energy_consumption, temperature) AS correlation
-FROM energy_data;
+select payload."temperature",avg(payload."energy_consumed") from energy group by payload."temperature" order BY
+payload."temperature" desc;
 
 REFRESH MATERIALIZED VIEW ENERGY;
+-- Calculate total energy consumption per location
+SELECT payload."location", SUM(payload."energy_consumed") AS total_energy_consumption
+FROM energy
+GROUP BY payload."location" order by payload."location";
+
 -- Visualize energy consumption trends over time
-SELECT DATE_TRUNC('day', timestamp) AS date, AVG(energy_consumption) AS avg_energy_consumption
-FROM energy_data
-GROUP BY DATE_TRUNC('day', timestamp)
-ORDER BY date;
+SELECT DATE_TRUNC('second', approximate_arrival_timestamp) AS time, AVG(payload."energy_consumed") AS avg_energy_consumption
+FROM energy
+GROUP BY DATE_TRUNC('second', approximate_arrival_timestamp)
+ORDER BY time desc;
 
-REFRESH MATERIALIZED VIEW ENERGY;
 -- Calculate average energy consumption per location
-SELECT location,
-       AVG(energy_consumption) AS avg_energy_consumption
-FROM energy_data
-GROUP BY location
+SELECT payload."location",
+       AVG(payload."energy_consumed") AS avg_energy_consumption
+FROM energy
+GROUP BY payload."location"
 ORDER BY avg_energy_consumption DESC;
 
 REFRESH MATERIALIZED VIEW ENERGY;
 -- Identify abnormal energy consumption events (e.g., outliers)
-SELECT location, timestamp, energy_consumption
-FROM energy_data
-WHERE energy_consumption > (SELECT AVG(energy_consumption) + 2 * STDDEV(energy_consumption) FROM energy_data)
-ORDER BY energy_consumption DESC;
+SELECT payload."location", approximate_arrival_timestamp, payload."energy_consumed"
+FROM energy
+WHERE payload."energy_consumed" > 12
+ORDER BY payload."energy_consumed" DESC;
 
 
 

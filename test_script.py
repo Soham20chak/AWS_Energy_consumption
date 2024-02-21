@@ -12,18 +12,12 @@ kinesis_client = boto3.client('kinesis',aws_access_key_id=aws_access_key_id,aws_
 # Name of the Kinesis Data Stream
 stream_name = 'energy_data_stream'
 
-# Function to generate simulated energy consumption data
-location = random.choice(['home', 'office', 'factory'])
-energy_consumption = round(random.uniform(1, 10), 2)  # Simulated energy consumption in kWh
-timestamp = int(time.time())
-temperature = round(random.uniform(15, 35), 2)  # Simulated temperature in Celsius
-humidity = round(random.uniform(30, 70), 2)  # Simulated humidity in percentage
-mydata = '{ "location": ' + str(location) + ', "energy_consumption": ' + str(energy_consumption) + ', "timestamp": ' + str(timestamp) + ', "temperature": ' + str(temperature) + ', "humidity": ' + str(humidity) + '}'
-partition_key = str(location)
-kinesis_client.put_record(
-    StreamName=stream_name,
-    Data=mydata,
-    PartitionKey=partition_key
-)
-print("Sent data: ", mydata)
-time.sleep(5)  # Adjust the frequency of data generation as needed
+for x in range(1, 50):
+    loc = random.randint(1, 3)
+    energy = random.randint(1, 15)
+    temp = random.randint(5,40)
+    humidity = random.randint(30,70)
+    mydata = '{ "location": ' + str(loc) + ', "energy_consumed": ' + str(energy) + ', "temperature": ' + str(temp) + ', "humidity": ' + str(humidity) + '}'
+    partitionkey = random.randint(10, 100);
+    response = kinesis_client.put_record(StreamName='energy_data_stream', Data=mydata, PartitionKey=str(partitionkey))
+    print("Ingestion Done")

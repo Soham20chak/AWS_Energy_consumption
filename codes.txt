@@ -15,6 +15,17 @@ CREATE MATERIALIZED VIEW ENERGY AS
 
 select * from ENERGY
 
+--CLEANSING
+REFRESH MATERIALIZED VIEW ENERGY;
+UPDATE energy
+SET payload."temperature" = 0
+WHERE temperature IS NULL;
+
+--CLEANSING
+REFRESH MATERIALIZED VIEW ENERGY;
+UPDATE energy
+SET payload."energy_consumed" = 0
+WHERE payload."energy_consumed" < 0 OR payload."energy_consumed" > 15;
 
 REFRESH MATERIALIZED VIEW ENERGY;
 -- Calculate total energy consumption per location
@@ -22,8 +33,9 @@ SELECT location, SUM(energy_consumption) AS total_energy_consumption
 FROM energy_data
 GROUP BY location;
 
+REFRESH MATERIALIZED VIEW ENERGY;
 select payload."temperature",avg(payload."energy_consumed") from energy group by payload."temperature" order BY
-payload."temperature" desc;
+payload."energy_consumed" desc;
 
 REFRESH MATERIALIZED VIEW ENERGY;
 -- Calculate total energy consumption per location

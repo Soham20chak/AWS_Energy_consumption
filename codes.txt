@@ -51,6 +51,22 @@ FROM energy
 WHERE payload."energy_consumed" > 12
 ORDER BY payload."energy_consumed" DESC;
 
+REFRESH MATERIALIZED VIEW ENERGY;
+-- Query to detect anomalies in energy consumption
+SELECT
+    timestamp_column,
+    energy_consumed,
+    CASE
+        WHEN energy_consumed > (SELECT AVG(energy_consumed) FROM energy_data_table) * 2 THEN 'High Consumption'
+        WHEN energy_consumed < (SELECT AVG(energy_consumed) FROM energy_data_table) * 0.5 THEN 'Low Consumption'
+        ELSE 'Normal Consumption'
+    END AS consumption_status
+FROM
+    energy_data_table
+WHERE
+    timestamp_column BETWEEN TIMESTAMP 'start_date_time' AND TIMESTAMP 'end_date_time';
+In these queries:
+
 
 
 

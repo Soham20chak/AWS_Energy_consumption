@@ -12,7 +12,7 @@ kinesis_client = boto3.client('kinesis',aws_access_key_id=aws_access_key_id,aws_
 # Name of the Kinesis Data Stream
 stream_name = 'energy_data_stream'
 
-for x in range(1, 50):
+for x in range(1, 100):
     loc = random.randint(1, 3)
     temp = random.randint(5,40)
     energy = random.randint(1, 15)

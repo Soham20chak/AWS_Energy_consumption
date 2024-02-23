@@ -9,7 +9,7 @@ CREATE MATERIALIZED VIEW ENERGY AS
     partition_key,
     shard_id,
     sequence_number,
-    FROM_VARBYTE(kinesis_data, 'utf8') as payload    
+    json_parse(FROM_VARBYTE(kinesis_data, 'utf8')) as payload    
     FROM ENERGY_CONSUMPTION.energy_data_stream;
 
 

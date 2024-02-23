@@ -14,7 +14,6 @@ stream_name = 'energy_data_stream'
 
 for x in range(1, 100):
     loc = random.randint(1, 3)
-    temp = random.randint(5,40)
     energy = random.randint(1, 15)
     temp = random.randint(5,40)
     humidity = random.randint(30,70)

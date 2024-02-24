@@ -36,11 +36,11 @@ GROUP BY payload."location" order by payload."location";
 REFRESH MATERIALIZED VIEW ENERGY;
 --Analyze energy consumed with respect to temperature
 select payload."temperature",avg(payload."energy_consumed") from energy group by payload."temperature" order BY
-payload."energy_consumed" desc;
+payload."temperature" desc;
 
 --Analyze energy consumed with respect to humidity
-select payload."temperature",avg(payload."energy_consumed") from energy group by payload."humidity" order BY
-payload."energy_consumed" desc;
+select payload."humidity",avg(payload."energy_consumed") from energy group by payload."humidity" order BY
+payload."humidity" desc;
 
 -- Visualize energy consumption trends over time
 SELECT DATE_TRUNC('second', approximate_arrival_timestamp) AS time, AVG(payload."energy_consumed") AS avg_energy_consumption
@@ -65,18 +65,18 @@ ORDER BY payload."energy_consumed" DESC;
 REFRESH MATERIALIZED VIEW ENERGY;
 -- Query to detect anomalies in energy consumption
 SELECT
-    payload."energy_consumed",
+    count(payload."energy_consumed"),
     CASE
-        WHEN payload."energy_consumed" > 13 THEN 'High Consumption'
-        WHEN payload."energy_consumed" < 5 THEN 'Low Consumption'
-        ELSE 'Normal Consumption'
+        WHEN payload."energy_consumed" > 13 THEN 'High'
+        WHEN payload."energy_consumed" < 5 THEN 'Low'
+        ELSE 'Normal'
     END AS consumption_status
 FROM
-    energy
+    energy GROUP BY consumption_status;
 
 --Avg energy consumption , temperature , humidity in each location
 select payload."location",avg(payload."energy_consumed"),avg(payload."temperature"),avg(payload."humidity") 
-group by payload."location"  
+ from energy group by payload."location"  
 
 
 

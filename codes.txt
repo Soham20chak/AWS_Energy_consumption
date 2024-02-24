@@ -13,7 +13,7 @@ CREATE MATERIALIZED VIEW ENERGY AS
     FROM ENERGY_CONSUMPTION.energy_data_stream;
 
 
-select * from ENERGY
+--select * from ENERGY
 
 --CLEANSING
 REFRESH MATERIALIZED VIEW ENERGY;
@@ -29,19 +29,18 @@ WHERE payload."energy_consumed" < 0 OR payload."energy_consumed" > 15;
 
 REFRESH MATERIALIZED VIEW ENERGY;
 -- Calculate total energy consumption per location
-SELECT location, SUM(energy_consumption) AS total_energy_consumption
-FROM energy_data
-GROUP BY location;
-
-REFRESH MATERIALIZED VIEW ENERGY;
-select payload."temperature",avg(payload."energy_consumed") from energy group by payload."temperature" order BY
-payload."energy_consumed" desc;
-
-REFRESH MATERIALIZED VIEW ENERGY;
--- Calculate total energy consumption per location
 SELECT payload."location", SUM(payload."energy_consumed") AS total_energy_consumption
 FROM energy
 GROUP BY payload."location" order by payload."location";
+
+REFRESH MATERIALIZED VIEW ENERGY;
+--Analyze energy consumed with respect to temperature
+select payload."temperature",avg(payload."energy_consumed") from energy group by payload."temperature" order BY
+payload."energy_consumed" desc;
+
+--Analyze energy consumed with respect to humidity
+select payload."temperature",avg(payload."energy_consumed") from energy group by payload."humidity" order BY
+payload."energy_consumed" desc;
 
 -- Visualize energy consumption trends over time
 SELECT DATE_TRUNC('second', approximate_arrival_timestamp) AS time, AVG(payload."energy_consumed") AS avg_energy_consumption
@@ -66,18 +65,20 @@ ORDER BY payload."energy_consumed" DESC;
 REFRESH MATERIALIZED VIEW ENERGY;
 -- Query to detect anomalies in energy consumption
 SELECT
-    timestamp_column,
-    energy_consumed,
+    payload."energy_consumed",
     CASE
-        WHEN energy_consumed > (SELECT AVG(energy_consumed) FROM energy_data_table) * 2 THEN 'High Consumption'
-        WHEN energy_consumed < (SELECT AVG(energy_consumed) FROM energy_data_table) * 0.5 THEN 'Low Consumption'
+        WHEN payload."energy_consumed" > 13 THEN 'High Consumption'
+        WHEN payload."energy_consumed" < 5 THEN 'Low Consumption'
         ELSE 'Normal Consumption'
     END AS consumption_status
 FROM
-    energy_data_table
-WHERE
-    timestamp_column BETWEEN TIMESTAMP 'start_date_time' AND TIMESTAMP 'end_date_time';
-In these queries:
+    energy
+
+--Avg energy consumption , temperature , humidity in each location
+select payload."location",avg(payload."energy_consumed"),avg(payload."temperature"),avg(payload."humidity") 
+group by payload."location"  
+
+
 
 
 

@@ -4,10 +4,12 @@ import boto3
 
 def lambda_handler(event, context):
     sns_topic_arn = 'arn:aws:sns:us-east-1:896334692798:excess_alert'
-
+    dynamodb=boto3.resource('dynamodb')
+    table=dynamodb.Table('energy-alert-information')
     # Check if the 'Records' key exists in the event
     if 'Records' in event:
         for record in event['Records']:
+            pk=record['kinesis']['partitionKey']
             # Decode the Kinesis record data (assuming it's in base64)
             kinesis_data = record['kinesis']['data']
             decoded_data = base64.b64decode(kinesis_data).decode('utf-8')
@@ -20,6 +22,10 @@ def lambda_handler(event, context):
             if energy_consumed > 12:
                 sns_client = boto3.client('sns')
                 sns_client.publish(TopicArn=sns_topic_arn, Message=message)
+                table.put_item(Item={
+                    "pk":pk,
+                    "data":data
+                })
 
         return "Processed {} records.".format(len(event['Records']))
     else:
